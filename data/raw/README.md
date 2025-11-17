@@ -17,7 +17,7 @@ The cleaned datasets used for SQL population are located in `/data/clean/`.
 - **Description:**  
   Contains U.S. job postings scraped from LinkedIn, including salary ranges, job titles, job descriptions, experience levels, and employer details.
 
-We downloaded the full dataset as a ZIP file (`linkedin_raw.zip`) and stored it here unchanged.
+As the original raw datasets are too large to include in this repository, we decide to leave the URL above for reference.
 
 ---
 
