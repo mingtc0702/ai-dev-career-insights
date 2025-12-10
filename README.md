@@ -99,3 +99,9 @@ This ensures the ER diagram is **connected** and analytically meaningful.
 | **Lingchong Hu** | Data Cleaning & Analytics |
 
 All members contributed code via GitHub with visible commit history.
+
+---
+
+## Running the code
+
+cd into server and run npm install and then npm start. Do the same for client
