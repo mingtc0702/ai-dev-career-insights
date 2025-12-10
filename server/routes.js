@@ -1,5 +1,5 @@
 const { Pool, types, Query } = require('pg');
-const config = require('./config.js')
+const config = require('./config.json')
 
 // Override the default parsing for BIGINT (PostgreSQL type ID 20)
 types.setTypeParser(20, val => parseInt(val, 10)); //DO NOT DELETE THIS
