@@ -1,4 +1,4 @@
-const { Pool, types } = require('pg');
+const { Pool, types, Query } = require('pg');
 const config = require('./config.json')
 
 // Override the default parsing for BIGINT (PostgreSQL type ID 20)
@@ -24,17 +24,37 @@ connection.connect((err) => err && console.log(err));
 
 // Route 1: GET /jobs/highest-paid
 const highest_paid = async function(req, res) {
+  const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+  const location = req.query.location ?? null;
+  const family = req.query.family ?? null;
+
+  let Query = `
+  SELECT DISTINCT
+    title,
+    company_name,
+    normalized_salary
+  FROM linkedin_jobs
+  `;
+
+  let whereString = `WHERE normalized_salary IS NOT NULL\n`;
+  let params = [];
+  let idx = 1;
+
+  if (location) {
+    whereString += ` AND job_country ILIKE $${idx++}\n`;
+    params.push(`%${location}%`)
+  }
+  if (family) {
+    whereString += `AND job_family ILIKE $${idx++}\n`;
+    params.push(`%${family}%`)
+  }
+  whereString += `ORDER BY normalized_salary DESC LIMIT $${idx++}`;
+  params.push(limit);
+
+  Query += whereString;
+
   // Query Implementation
-  connection.query(`
-    SELECT DISTINCT
-      title,
-      company_name,
-      normalized_salary
-    FROM linkedin_jobs
-    WHERE normalized_salary IS NOT NULL
-    ORDER BY normalized_salary DESC
-    LIMIT 10;
-  `, (err, data) => {
+  connection.query(Query, params, (err, data) => {
     if (err) {
       // Error Handling
       console.log(err);
@@ -47,15 +67,47 @@ const highest_paid = async function(req, res) {
 
 // Route 2: GET /jobs/experience-level-count
 const experience_level_count = async function(req, res) {
-  // Query Implementation
-  connection.query(`
+  const location = req.query.location ?? null;
+  const family = req.query.family ?? null;
+  const minSalary = req.query.minSalary ?? null;
+
+  let Query = `
     SELECT
       formatted_experience_level,
       COUNT(*) AS postings_count
     FROM linkedin_jobs
+  `
+
+  let whereStrings = [];
+  let params = [];
+  let idx = 1;
+
+  if (location) {
+    whereStrings.push(`job_country ILIKE $${idx++}`);
+    params.push(`%${location}%`);
+  }
+
+  if (family) {
+    whereStrings.push(`job_family ILIKE $${idx++}`);
+    params.push(`%${family}%`);
+  }
+
+  if (minSalary) {
+    whereStrings.push(`normalized_salary >= $${idx++}`);
+    params.push(Number(minSalary));
+  }
+
+  if (whereStrings.length > 0) {
+    Query += "WHERE " + whereStrings.join(" AND ") + "\n";
+  }
+
+  Query += `
     GROUP BY formatted_experience_level
     ORDER BY postings_count DESC;
-  `, (err, data) => {
+  `;
+
+  // Query Implementation
+  connection.query(Query, params, (err, data) => {
     if (err) {
       // Error Handling
       console.log(err);
@@ -68,13 +120,31 @@ const experience_level_count = async function(req, res) {
 
 // Route 3: GET /survey/python-users
 const python_users = async function(req, res) {
+  const respondentCountry = req.query.respondentCountry ?? null;
+  const minSalary = req.query.minSalary ?? null;
+
+  let Query = ` SELECT
+                COUNT(*) AS python_users
+                FROM survey_responses
+                WHERE LOWER(language_have_worked_with) LIKE '%python%'
+              `
+  let params = [];
+  let idx = 1;
+
+  if (respondentCountry) {
+    Query += `AND country ILIKE $${idx++}\n`;
+    params.push(`%${respondentCountry}%`);
+  }
+
+  if (minSalary) {
+    Query += `AND salary >= $${idx++}`;
+    params.push(Number(minSalary));
+  }
+
+  Query += `;`;
+
   // Query Implementation
-  connection.query(`
-    SELECT
-      COUNT(*) AS python_users
-    FROM survey_responses
-    WHERE LOWER(language_have_worked_with) LIKE '%python%';
-  `, (err, data) => {
+  connection.query(Query, params, (err, data) => {
     if (err) {
       // Error Handling
       console.log(err);
@@ -87,17 +157,33 @@ const python_users = async function(req, res) {
 
 // Route 4: GET /jobs/avg-salary-by-state
 const avg_salary_by_state = async function(req, res) {
+  const requiresAI = req.query.requiresAI ?? null;
+  const minPostings = req.query.minPostings ?? null;
+
+  let Query = `SELECT
+                job_country AS state,
+                AVG(normalized_salary) AS avg_salary
+              FROM linkedin_jobs
+              WHERE normalized_salary IS NOT NULL
+                AND job_country ~ '^[A-Z]{2}$'
+                `
+  let params = [];
+  let idx = 1;
+
+  if (requiresAI !== null) {
+    Query += ` AND requires_ai_skill = $${idx++}\n`;
+    params.push(requiresAI === 'true');
+  }
+
+  Query += ` GROUP BY state`
+  if (minPostings !== null) {
+    Query += ` HAVING COUNT(*) >= $${idx++}`
+    params.push(Number(minPostings));
+  }
+  Query += ` ORDER BY avg_salary DESC;`;
+
   // Query Implementation
-  connection.query(`
-    SELECT
-      job_country AS state,
-      AVG(normalized_salary) AS avg_salary
-    FROM linkedin_jobs
-    WHERE normalized_salary IS NOT NULL
-      AND job_country ~ '^[A-Z]{2}$'  
-    GROUP BY state
-    ORDER BY avg_salary DESC;
-  `, (err, data) => {
+  connection.query(Query, params, (err, data) => {
     if (err) {
       // Error Handling
       console.log(err);
@@ -110,8 +196,10 @@ const avg_salary_by_state = async function(req, res) {
 
 // Route 5: GET /jobs/ai-vs-non-ai-salaries
 const ai_vs_non_ai_salaries = async function(req, res) {
+  const country = req.query.country ?? null;
+  const family = req.query.family ?? null;
   // Query Implementation
-  connection.query(`
+  let Query = `
     SELECT
       CASE WHEN requires_ai_skill = TRUE THEN 'AI Jobs'
             ELSE 'Non-AI Jobs'
@@ -120,8 +208,23 @@ const ai_vs_non_ai_salaries = async function(req, res) {
       PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY normalized_salary) AS median_salary
     FROM linkedin_jobs
     WHERE normalized_salary IS NOT NULL
-    GROUP BY job_type;
-  `, (err, data) => {
+  `
+  let params = [];
+  let idx = 1;
+
+  if (country) {
+    Query += ` AND job_country ILIKE $${idx++}\n`;
+    params.push(`%${country}%`);
+  }
+
+  if (family) {
+    Query += ` AND job_family ILIKE $${idx++}\n`;
+    params.push(`%${family}%`);
+  }
+
+  Query += `GROUP BY job_type;`;
+
+  connection.query(Query, params, (err, data) => {
     if (err) {
       // Error Handling
       console.log(err);
@@ -134,18 +237,26 @@ const ai_vs_non_ai_salaries = async function(req, res) {
 
 // Route 6: GET /companies/ai-highest-paying
 const ai_highest_paying = async function(req, res) {
+  const minPostings = req.query.minPostings ? parseInt(req.query.minPostings) : 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 20;
+
+  let params = [minPostings, limit];
+  let idx = 1;
+  let Query = `SELECT
+                company_name,
+                COUNT(*) AS ai_job_count,
+              AVG(normalized_salary) AS avg_ai_salary
+              FROM linkedin_jobs
+              WHERE requires_ai_skill = TRUE 
+                AND normalized_salary IS NOT NULL
+              GROUP BY company_name
+              HAVING COUNT(*) >= $${idx++}
+              ORDER BY avg_ai_salary DESC
+              LIMIT $${idx++};
+              `
+
   // Query Implementation
-  connection.query(`
-    SELECT
-      company_name,
-      COUNT(*) AS ai_job_count,
-      AVG(normalized_salary) AS avg_ai_salary
-    FROM linkedin_jobs
-    WHERE requires_ai_skill = TRUE AND normalized_salary IS NOT NULL
-    GROUP BY company_name
-    HAVING COUNT(*) >= 5
-    ORDER BY avg_ai_salary DESC;
-  `, (err, data) => {
+  connection.query(Query, params, (err, data) => {
     if (err) {
       // Error Handling
       console.log(err);
@@ -158,8 +269,11 @@ const ai_highest_paying = async function(req, res) {
 
 // Route 7: GET /skills/popularity
 const popularity = async function(req, res) {
-  // Query Implementation
-  connection.query(`
+  const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+  const family = req.query.family ?? null;
+  const minSalary = req.query.minSalary ? parseInt(req.query.minSalary) : null;
+
+  let Query = `
     SELECT
       lang.language,
       COUNT(*) AS survey_usage_count,
@@ -167,6 +281,18 @@ const popularity = async function(req, res) {
     FROM (
       SELECT unnest(string_to_array(language_have_worked_with, ';')) AS language
       FROM survey_responses
+    `
+  let params = [];
+  let idx = 1;
+
+  if (minSalary) {
+    Query += `WHERE salary IS NOT NULL
+                AND salary >= $${idx++}
+              `
+    params.push(Number(minSalary))
+  }
+
+  Query += `
     ) lang
     LEFT JOIN (
       SELECT
@@ -175,14 +301,25 @@ const popularity = async function(req, res) {
       FROM (
           SELECT unnest(string_to_array(skills_desc, ' ')) AS language
           FROM linkedin_jobs
-      ) t
+  `
+
+  if (family) {
+    Query += `WHERE job_family ILIKE $${idx++}\n`
+    params.push(`%${family}%`)
+  }
+
+  Query += `) t
       GROUP BY language
     ) job
     ON LOWER(lang.language) = LOWER(job.language)
     GROUP BY lang.language, job.job_mentions
     ORDER BY survey_usage_count DESC
-    LIMIT 10;
-  `, (err, data) => {
+    LIMIT $${idx++};
+    `
+  params.push(limit);
+
+  // Query Implementation
+  connection.query(Query, params, (err, data) => {
     if (err) {
       // Error Handling
       console.log(err);
@@ -195,8 +332,10 @@ const popularity = async function(req, res) {
 
 // Route 8: GET /analysis/salary-alignment
 const salary_alignment = async function(req, res) {
-  // Query Implementation
-  connection.query(`
+  const family = req.query.family ?? null;
+  const minSalary = req.query.minSalary ?? null;
+
+  let Query = `
     SELECT DISTINCT
       job_family,
       title,
@@ -205,8 +344,24 @@ const salary_alignment = async function(req, res) {
       RANK() OVER (PARTITION BY job_family ORDER BY normalized_salary DESC) AS salary_rank
     FROM linkedin_jobs
     WHERE normalized_salary IS NOT NULL
-    ORDER BY job_family, salary_rank;
-  `, (err, data) => {
+  `
+  let params = [];
+  let idx = 1;
+
+  if (family) {
+    Query += ` AND job_family ILIKE $${idx++}\n`
+    params.push(`%${family}%`)
+  }
+
+  if (minSalary) {
+    Query += ` AND normalized_salary >= $${idx++}\n`
+    params.push(minSalary)
+  }
+
+  Query += `ORDER BY job_family, salary_rank;`
+
+  // Query Implementation
+  connection.query(Query, params, (err, data) => {
     if (err) {
       // Error Handling
       console.log(err);
@@ -219,8 +374,14 @@ const salary_alignment = async function(req, res) {
 
 // Route 9: GET /experience/matching-levels
 const matching_levels = async function(req, res) {
-  // Query Implementation
-  connection.query(`
+  const country = req.query.country ?? null;
+  const family = req.query.family ?? null;
+
+  let whereStrings = [];
+  let params = [];
+  let idx = 1;
+
+  let Query = `
     WITH survey_counts AS (
       SELECT
           CASE
@@ -231,7 +392,14 @@ const matching_levels = async function(req, res) {
           END AS survey_level,
           COUNT(*) AS survey_count
       FROM survey_responses
-      GROUP BY 1
+  `
+  if (country) {
+    Query += ` WHERE country ILIKE $${idx++}\n`
+    params.push(`%${country}%`)
+  }
+
+  Query += `
+    GROUP BY 1
     ),
     job_counts AS (
       SELECT
@@ -243,7 +411,23 @@ const matching_levels = async function(req, res) {
           END AS job_level,
           COUNT(*) AS job_count
       FROM linkedin_jobs
-      GROUP BY 1
+  `
+
+  if (country) {
+    whereStrings.push(`job_country ILIKE $${idx++}`);
+    params.push(`%${country}%`);
+  }
+
+  if (family) {
+    whereStrings.push(`job_family ILIKE $${idx++}`);
+    params.push(`%${family}%`);
+  }
+
+  if (whereStrings.length > 0) {
+    Query += " WHERE " + whereStrings.join(" AND ") + "\n";
+  }
+
+  Query += `GROUP BY 1
     )
     SELECT
       s.survey_level,
@@ -253,7 +437,10 @@ const matching_levels = async function(req, res) {
     LEFT JOIN job_counts j
       ON s.survey_level = j.job_level
     ORDER BY matching_jobs DESC;
-  `, (err, data) => {
+  `
+
+  // Query Implementation
+  connection.query(Query, params, (err, data) => {
     if (err) {
       // Error Handling
       console.log(err);
@@ -266,23 +453,64 @@ const matching_levels = async function(req, res) {
 
 // Route 10: GET /ai/sentiment-vs-market
 const sentiment_vs_market = async function(req, res) {
-  // Query Implementation
-  connection.query(`
-    WITH survey_sentiment AS (
+  const role = req.query.role ?? null;
+  const minSalary = req.query.minSalary ? parseInt(req.query.minSalary) : null;
+  const minExperience = req.query.minExperience ? parseInt(req.query.minExperience) : null;
+  const family = req.query.family ?? null;
+
+  let Query = `WITH survey_sentiment AS (
       SELECT
           ai_sentiment,
           COUNT(*) AS respondent_count,
           AVG(salary) AS avg_survey_salary
       FROM survey_responses
       WHERE ai_sentiment IS NOT NULL
-      GROUP BY ai_sentiment
+      `
+  let whereStrings = [];
+  let params = [];
+  let idx = 1;
+
+  let whereStrings2 = [];
+
+  if (role) {
+    whereStrings.push(`job_role ILIKE $${idx++}`);
+    params.push(`%${role}%`);
+  }
+
+  if (minSalary) {
+    whereStrings.push(`salary >= $${idx++}`);
+    params.push(Number(minSalary));
+  }
+
+  if (minExperience) {
+    whereStrings.push(`experience_years >= $${idx++}`);
+    params.push(Number(minExperience));
+  }
+
+  if (whereStrings.length > 0) {
+    Query += ` AND ` + whereStrings.join(" AND ") + "\n";
+  }
+
+  Query += `
+    GROUP BY ai_sentiment
     ),
     ai_jobs AS (
       SELECT
           requires_ai_skill,
           AVG(normalized_salary) AS avg_ai_job_salary
       FROM linkedin_jobs
-      GROUP BY requires_ai_skill
+    `
+    if (family) {
+      whereStrings2.push(`job_family ILIKE $${idx++}`);
+      params.push(`%${family}%`);
+    }
+
+    if (whereStrings2.length > 0) {
+    Query += ` WHERE ` + whereStrings2.join(" AND ") + "\n";
+  }
+
+    Query += `
+    GROUP BY requires_ai_skill
     )
     SELECT
       ss.ai_sentiment,
@@ -293,7 +521,10 @@ const sentiment_vs_market = async function(req, res) {
     LEFT JOIN ai_jobs aj
       ON aj.requires_ai_skill = TRUE
     ORDER BY respondent_count DESC;
-  `, (err, data) => {
+  `
+
+  // Query Implementation
+  connection.query(Query, params, (err, data) => {
     if (err) {
       // Error Handling
       console.log(err);
