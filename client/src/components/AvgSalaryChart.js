@@ -11,6 +11,8 @@ import {
 import { Typography, CircularProgress } from "@mui/material";
 const config = require('../config.json');
 
+//Compare AVG salary by state
+
 export default function AvgSalaryChart() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);

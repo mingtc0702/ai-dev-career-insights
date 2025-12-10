@@ -5,6 +5,8 @@ import AIAdoptionTrend from "../components/AIAdoptionTrend";
 import AiHighestPayingCompanies from "../components/AIHighestPaying";
 import SalaryAlignmentExplorer from "../components/SalaryAlignment";
 
+//Format of AI Adoption Page
+
 export default function AIAdoption() {
   return (
     <Stack spacing={4} sx={{ p: 3 }}>

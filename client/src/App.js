@@ -15,6 +15,8 @@ import SkillInsights from "./pages/SkillInsights";
 import AIAdoption from "./pages/AIAdoption";
 import InteractiveDataExplorer from "./components/InteractiveDataExplorer";
 
+//Format of Home Page
+
 function Home() {
   return (
     <Stack
@@ -27,44 +29,44 @@ function Home() {
       }}
     >
       <Stack
-  spacing={2} // reduced spacing between paragraphs
-  sx={{
-    maxWidth: "800px",
-    textAlign: "left", // left align the entire section
-    lineHeight: 1.6,   // improved readability
-  }}
->
-  <Typography
-    variant="h3"
-    fontWeight={600}
-    sx={{
-      mb: 1, // tighter spacing under heading
-    }}
-  >
-    Welcome to Tech Insights Dashboard
-  </Typography>
+        spacing={2}
+        sx={{
+          maxWidth: "800px",
+          textAlign: "left",
+          lineHeight: 1.6,
+        }}
+      >
+        <Typography
+          variant="h3"
+          fontWeight={600}
+          sx={{
+            mb: 1,
+          }}
+        >
+          Welcome to Tech Insights Dashboard
+        </Typography>
 
-  <Typography variant="body1" color="text.secondary">
-    The rapid rise of AI adoption has transformed the global technology
-    workforce, yet many questions remain unanswered:
-  </Typography>
+        <Typography variant="body1" color="text.secondary">
+          The rapid rise of AI adoption has transformed the global technology
+          workforce, yet many questions remain unanswered:
+        </Typography>
 
-  <Typography variant="body1" color="text.secondary">
-    Which roles earn the most? Which skills are in highest demand? How does
-    AI influence compensation and career progression?
-  </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Which roles earn the most? Which skills are in highest demand? How does
+          AI influence compensation and career progression?
+        </Typography>
 
-  <Typography variant="body1" color="text.secondary">
-    Our project combines LinkedIn Job Postings with multi-year StackOverflow
-    Developer Surveys to provide insights into hiring trends and skill
-    evolution.
-  </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Our project combines LinkedIn Job Postings with multi-year StackOverflow
+          Developer Surveys to provide insights into hiring trends and skill
+          evolution.
+        </Typography>
 
-  <Typography variant="body1" color="text.secondary">
-    Explore salary trends, skill popularity, and AI adoption across roles,
-    countries, and experience levels.
-  </Typography>
-</Stack>
+        <Typography variant="body1" color="text.secondary">
+          Explore salary trends, skill popularity, and AI adoption across roles,
+          countries, and experience levels.
+        </Typography>
+      </Stack>
 
 
       <Paper
@@ -104,7 +106,7 @@ export default function App() {
       <AppBar
         position="static"
         sx={{
-          backgroundColor: "#0A2342", // Navy blue
+          backgroundColor: "#0A2342",
         }}
       >
         <Toolbar sx={{ gap: 3 }}>

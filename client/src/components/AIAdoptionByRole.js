@@ -3,6 +3,8 @@ import { Typography, CircularProgress } from "@mui/material";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 const config = require('../config.json');
 
+//Compares salaries of AI and non-AI roles
+
 export default function AIAdoptionByRole() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -3,6 +3,8 @@ import { Stack, Typography, Divider, Paper, Link } from "@mui/material";
 import AvgSalaryChart from "../components/AvgSalaryChart";
 import HighestPaidJobsChart from "../components/HighestPaidJobsChart";
 
+//Format of Salary Page
+
 export default function SalaryInsights() {
   return (
     <Stack spacing={4}>

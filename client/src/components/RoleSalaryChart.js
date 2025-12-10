@@ -3,6 +3,8 @@ import { Typography, CircularProgress } from "@mui/material";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, LabelList, CartesianGrid, ResponsiveContainer } from "recharts";
 const config = require('../config.json');
 
+//Salary by Role
+
 export default function RoleSalaryChart() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);

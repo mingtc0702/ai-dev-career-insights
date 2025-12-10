@@ -3,6 +3,8 @@ import { Typography, CircularProgress } from "@mui/material";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 const config = require('../config.json');
 
+// explore skills vs usage
+
 export default function SkillUsageExplorer() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);

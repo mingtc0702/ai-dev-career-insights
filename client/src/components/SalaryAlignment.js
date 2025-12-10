@@ -3,6 +3,8 @@ import { Typography, CircularProgress, Paper } from "@mui/material";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 const config = require("../config.json");
 
+// Salary by job family
+
 export default function AvgSalaryByJobFamilyChart() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +18,7 @@ export default function AvgSalaryByJobFamilyChart() {
         rows.forEach(row => {
           let salary = row.normalized_salary;
           if (salary != null) {
-            salary = Number(salary); // ensure it's numeric
+            salary = Number(salary);
             if (!isNaN(salary)) {
               const family = row.job_family || "Unknown";
               if (!salaryMap[family]) salaryMap[family] = { totalSalary: 0, count: 0 };
@@ -31,7 +33,7 @@ export default function AvgSalaryByJobFamilyChart() {
             job_family: family,
             avg_salary: count > 0 ? Math.round(totalSalary / count) : 0
           }))
-          .filter(d => d.avg_salary > 0) // remove any zero averages
+          .filter(d => d.avg_salary > 0)
           .sort((a, b) => b.avg_salary - a.avg_salary);
 
         setData(avgSalaryData);

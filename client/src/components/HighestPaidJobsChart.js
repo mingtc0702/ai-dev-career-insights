@@ -12,6 +12,8 @@ import {
 import { Typography, CircularProgress } from "@mui/material";
 const config = require('../config.json');
 
+//Chart of highest paying jobs
+
 export default function HighestPaidJobsChart() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);

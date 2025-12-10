@@ -20,6 +20,8 @@ import {
 } from "@mui/material";
 const config = require("../config.json");
 
+//Data explorer with filters and dropdowns
+
 export default function InteractiveDataExplorer() {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -121,7 +123,6 @@ export default function InteractiveDataExplorer() {
       </Typography>
 
       <Stack direction="row" spacing={2} flexWrap="wrap" mb={2}>
-        {/* Job Family */}
         <FormControl sx={{ minWidth: 150 }}>
           <InputLabel>Job Family</InputLabel>
           <Select
@@ -140,7 +141,6 @@ export default function InteractiveDataExplorer() {
           </Select>
         </FormControl>
 
-        {/* Text Filters */}
         {["title", "company_name", "salary_rank"].map((col) => (
           <TextField
             key={col}
@@ -154,7 +154,6 @@ export default function InteractiveDataExplorer() {
           />
         ))}
 
-        {/* Salary Slider */}
         <Stack sx={{ minWidth: 280 }}>
           <Typography gutterBottom>
             Salary Range (${filters.salary_range[0].toLocaleString()} - $
@@ -177,7 +176,6 @@ export default function InteractiveDataExplorer() {
         </Stack>
       </Stack>
 
-      {/* Table */}
       <TableContainer>
         <Table size="small">
           <TableHead>

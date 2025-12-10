@@ -3,6 +3,8 @@ import { Typography, CircularProgress } from "@mui/material";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 const config = require('../config.json');
 
+//Compares AI jobs by experience level
+
 export default function AIAdoptionTrend() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);

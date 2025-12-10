@@ -3,6 +3,8 @@ import { Typography, CircularProgress, Paper } from "@mui/material";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 const config = require("../config.json");
 
+//Find highest paying AI companies
+
 export default function AiHighestPayingCompanies() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,9 +12,15 @@ export default function AiHighestPayingCompanies() {
   useEffect(() => {
     fetch(`http://${config.server_host}:${config.server_port}/companies/ai-highest-paying?limit=15`)
       .then(res => res.json())
-      .then(rows => setData(rows))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
+      .then((rows) => {
+        const formatted = rows.map((row) => ({
+          company_name: row.company_name,
+          avg_ai_salary: Math.round(row.avg_ai_salary),
+        }));
+        setData(formatted);
+        setLoading(false);
+      })
+      .catch(err => console.error(err));
   }, []);
 
   if (loading) return <CircularProgress />;
