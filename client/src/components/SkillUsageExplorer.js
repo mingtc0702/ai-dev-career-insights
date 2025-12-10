@@ -10,9 +10,26 @@ export default function SkillUsageExplorer() {
   useEffect(() => {
     fetch(`http://${config.server_host}:${config.server_port}/skills/popularity`)
       .then(res => res.json())
-      .then(rows => setData(rows))
-      .finally(() => setLoading(false))
-      .catch(err => console.error(err));
+      .then(rows => {
+        // Deduplicate by language key & sum counts
+        const aggregated = rows.reduce((acc, row) => {
+          const key = row.language || "Unknown";
+          if (!acc[key]) {
+            acc[key] = { language: key, survey_usage_count: 0 };
+          }
+          acc[key].survey_usage_count += Number(row.survey_usage_count) || 0;
+          return acc;
+        }, {});
+
+        // Convert back to array and take top 10
+        const formatted = Object.values(aggregated)
+          .sort((a, b) => b.survey_usage_count - a.survey_usage_count)
+          .slice(0, 10);
+
+        setData(formatted);
+      })
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <CircularProgress />;
@@ -20,14 +37,14 @@ export default function SkillUsageExplorer() {
 
   return (
     <>
-      <Typography variant="h6" gutterBottom>Top 10 Most Popular Skills</Typography>
+      <Typography variant="h6" gutterBottom>Most Popular Skills</Typography>
       <ResponsiveContainer width="100%" height={400}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="language" />
           <YAxis />
           <Tooltip />
-          <Bar dataKey="survey_usage_count" fill="#f57c00" />
+          <Bar dataKey="survey_usage_count" />
         </BarChart>
       </ResponsiveContainer>
     </>

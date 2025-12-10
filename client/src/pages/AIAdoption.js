@@ -2,6 +2,8 @@ import React from "react";
 import { Stack, Typography, Divider, Paper } from "@mui/material";
 import AIAdoptionByRole from "../components/AIAdoptionByRole";
 import AIAdoptionTrend from "../components/AIAdoptionTrend";
+import AiHighestPayingCompanies from "../components/AIHighestPaying";
+import SalaryAlignmentExplorer from "../components/SalaryAlignment";
 
 export default function AIAdoption() {
   return (
@@ -15,7 +17,19 @@ export default function AIAdoption() {
       <Divider />
 
       <Paper sx={{ p: 3 }}>
+        <SalaryAlignmentExplorer/>
+      </Paper>
+
+      <Divider />
+
+      <Paper sx={{ p: 3 }}>
         <AIAdoptionTrend />
+      </Paper>
+
+      <Divider />
+
+      <Paper sx={{ p: 3 }}>
+        <AiHighestPayingCompanies/>
       </Paper>
     </Stack>
   );

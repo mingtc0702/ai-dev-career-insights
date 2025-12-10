@@ -21,6 +21,11 @@ function Home() {
     <Stack spacing={4} sx={{ p: 3 }}>
       <Typography variant="h3">Welcome to Tech Insights Dashboard</Typography>
       <Typography variant="body1">
+        The rapid acceleration of AI adoption has reshaped the global technology workforce. However, it remains unclear how developers’ usage of AI tools correlates with compensation, remote work patterns, and career progression across countries and job roles.
+We combine multi-year developer survey data (Stack Overflow Survey 2023–2025) with real industry salary data (Data Science Job Salaries dataset) to provide empirical evidence on trends in AI adoption and economic outcomes.
+
+      </Typography>
+      <Typography variant="body1">
         Explore salary trends, skill popularity, and AI adoption across roles, countries, and experience levels.
       </Typography>
 
