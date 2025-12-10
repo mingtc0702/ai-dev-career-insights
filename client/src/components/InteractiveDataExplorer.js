@@ -97,7 +97,8 @@ export default function InteractiveDataExplorer() {
           (salary >= filters.salary_range[0] &&
             salary <= filters.salary_range[1])) &&
         (filters.salary_rank === "" ||
-          rank.toString().includes(filters.salary_rank))
+  rank.toString() === filters.salary_rank)
+
       );
     });
 

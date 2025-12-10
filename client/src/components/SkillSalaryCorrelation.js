@@ -11,7 +11,22 @@ import {
 } from "recharts";
 const config = require("../config.json");
 
-// Scatterplot of skill usage counts vs LinkedIn mentions
+// Scatterplot usage vs linkedin mentions
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const p = payload[0].payload;
+    return (
+      <div style={{ background: "white", padding: 10, border: "1px solid #ccc" }}>
+        <strong>{p.language}</strong><br />
+        Developer Usage: {p.survey_usage_count.toLocaleString()} <br />
+        LinkedIn Mentions: {p.linkedin_job_mentions.toLocaleString()}
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function SkillSalaryCorrelation() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,14 +64,12 @@ export default function SkillSalaryCorrelation() {
           <XAxis
             type="number"
             dataKey="survey_usage_count"
-            name="Developer Usage"
-            label={{ value: "Developer Usage", position: "bottom", offset: 0 }}
+            label={{ value: "Developer Usage", position: "bottom" }}
           />
 
           <YAxis
             type="number"
             dataKey="linkedin_job_mentions"
-            name="LinkedIn Mentions"
             label={{
               value: "LinkedIn Mentions",
               angle: -90,
@@ -65,16 +78,9 @@ export default function SkillSalaryCorrelation() {
             }}
           />
 
-          <Tooltip
-            cursor={{ strokeDasharray: "3 3" }}
-            formatter={(value, name, entry) => [value.toLocaleString(), name]}
-          />
+          <Tooltip content={<CustomTooltip />} />
 
-          <Scatter
-            data={data}
-            fill="#0A2342"
-            name="Skill"
-          />
+          <Scatter data={data} fill="#0A2342" name="Skills" />
         </ScatterChart>
       </ResponsiveContainer>
     </>
