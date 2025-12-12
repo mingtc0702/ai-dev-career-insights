@@ -19,6 +19,22 @@ We ask questions like:
 
 ---
 
+## 🛠️ Tech Stack
+
+**Frontend**
+* React
+* Recharts (data visualizations)
+
+**Backend**
+* Node.js + Express
+* PostgreSQL (hosted locally or remote)
+
+**Data Layer**
+* Python (Pandas, NumPy) for cleaning
+* SQL for schema + analytical joins
+
+---
+
 ## 📂 Dataset Summary
 
 ### **1. StackOverflow Developer Survey (Cleaned)**  
@@ -144,5 +160,12 @@ npm start
 Your browser should automatically open:
 
 👉 http://localhost:3000
+
+This UI includes:
+- Interactive dashboards
+- Salary visualizations
+- Skill supply/demand analytics
+- AI impact insights
+- All charts fetch live data from the backend.
 
 With both server and client running, the full dashboard and analytics suite will be available locally. 🎉
