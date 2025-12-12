@@ -103,9 +103,7 @@ All members contributed code via GitHub with visible commit history.
 ---
 
 
----
-
-## 🚀 How to Run This Project Locally  
+## 🚀 How to Run This Project Locally
 
 Running the full application requires starting both the **backend API** and the **frontend React app**.  
 Follow the steps below to launch the project on your machine.
@@ -115,33 +113,36 @@ Follow the steps below to launch the project on your machine.
 ### 1️⃣ Start the Backend Server (Node.js + Express)
 
 The backend provides all SQL-driven analytics via REST API.
-
 ```bash
 cd server
 npm install
 npm start
+```
+
 Once started, the backend will be available at:
 
 👉 http://localhost:3001
 
 Make sure your PostgreSQL credentials are correctly configured in:
-
-bash
-Copy code
+```bash
 server/config.js
+```
+
 The backend must be running before the frontend can load graphs.
 
-2️⃣ Start the Frontend Client (React + Recharts)
-Open a new terminal window and run:
+---
 
-bash
-Copy code
+### 2️⃣ Start the Frontend Client (React + Recharts)
+
+Open a new terminal window and run:
+```bash
 cd client
 npm install
 npm start
+```
+
 Your browser should automatically open:
 
 👉 http://localhost:3000
-
 
 With both server and client running, the full dashboard and analytics suite will be available locally. 🎉
